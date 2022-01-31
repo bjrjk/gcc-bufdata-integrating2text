@@ -1,49 +1,3 @@
-# gcc-bufdata-integrating2text
-Integrating C Buffer Data Into the instruction of `.text` segment instead of on `.data`, `.rodata` to avoid copy.
-
-# Usage
-
-In your C code, invoke `INLINE_DATA_GEN(var_name, data)` 
-and use this preprocessor to replace it.
-
-Both `var_name` and `data` don't need quotation marks.
-For detail, please check example.
-
-# Example
-
-Example in `test/`.
-
-test.c:
-```c
-#include <stdio.h>
-int main(){
-    INLINE_DATA_GEN(buf, \x00\x01\x02aabbccjbinisdaf8wefwe322111hhh);
-    printf(buf);
-}
-```
-
-test_processed.c:
-```c
-#include <stdio.h>
-int main(){
-    __attribute__ ((aligned (1))) char
-buf_32[] = {104},
-buf_28[] = {49, 49, 104, 104},
-buf_24[] = {51, 50, 50, 49},
-buf_20[] = {101, 102, 119, 101},
-buf_16[] = {97, 102, 56, 119},
-buf_12[] = {110, 105, 115, 100},
-buf_8[] = {99, 106, 98, 105},
-buf_4[] = {97, 98, 98, 99},
-buf_0[] = {0, 1, 2, 97}
-;
-char* buf = buf_0;
-    printf(buf);
-}
-```
-
-test_processed.s:
-```asm
 	.file	"test_processed.c"
 	.text
 	.globl	main
@@ -106,8 +60,3 @@ main:
 3:
 	.align 8
 4:
-
-```
-
-It's easy to find that the buffer data aren't stored in the 
-`.data` or `.rodata` segment.
